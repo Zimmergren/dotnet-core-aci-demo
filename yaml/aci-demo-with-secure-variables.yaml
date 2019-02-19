@@ -1,0 +1,22 @@
+apiVersion: 2018-10-01
+name: aci-demo-app-with-secure-environmentvariables
+location: westeurope
+type: Microsoft.ContainerInstance/containerGroups
+properties:
+  osType: Linux
+  restartPolicy: Always
+  containers:
+  - name: aci-demo-app-with-secure-enviromentvariables
+    properties:
+      image: YOUR_ACR_REPO_HERE.azurecr.io/aci-demo-app:latest
+      resources:
+        requests:
+          cpu: 2.0
+          memoryInGB: 2.0
+      environmentVariables:
+        - name: 'AzureStorageAccountConnectionString'
+          secureValue: 'YOUR_CONNECTION_STRING_HERE'
+  imageRegistryCredentials:
+  - server: YOUR_ACR_REPO_HERE.azurecr.io
+    username: YOUR_ACR_NAME_HERE
+    password: YOUR_ACR_PASSWORD_HERE
