@@ -1,4 +1,4 @@
-# Azure Container Instances - C# .NET Core apps running as containers in your private Azure Container Registry
+# Azure Container Instances (ACI) - C# .NET Core examples and tips
 
 The source code and definition files in this repo serves as examples from various blog posts around Azure Container Registry, ACI.
 
