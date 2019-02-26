@@ -1,0 +1,21 @@
+apiVersion: 2018-10-01
+name: aci-demo-app-with-managed-identity
+location: westeurope
+type: Microsoft.ContainerInstance/containerGroups
+identity:
+  type: SystemAssigned
+properties:
+  osType: Linux
+  restartPolicy: Always
+  containers:
+  - name: aci-demo-app-with-managed-identity
+    properties:
+      image: acrdemomagic.azurecr.io/aci-demo-app-with-managed-identity:latest
+      resources:
+        requests:
+          cpu: 2.0
+          memoryInGB: 2.0
+  imageRegistryCredentials:
+  - server: acrdemomagic.azurecr.io
+    username: acrdemomagic
+    password: bXYqFzw2zMbp0NVBzI/QO3HiLzgju5mG
