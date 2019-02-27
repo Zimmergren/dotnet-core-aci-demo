@@ -56,7 +56,7 @@ namespace Zimmergren.ACI.DemoWithManagedIdentity
         /// <returns></returns>
         private static async Task<string> GetAccessTokenAsync(string authority, string resource, string scope)
         {
-            // If the token expires within the next five minutes, we'll grab a new one.
+            // If the token expires within the thirty seconds, we'll grab a new one.
             if (_cachedToken != null)
             {
                 if (_cachedToken.ExpiresOn > DateTime.UtcNow.AddSeconds(30))
