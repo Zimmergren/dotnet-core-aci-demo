@@ -56,6 +56,16 @@ namespace Zimmergren.ACI.DemoWithManagedIdentity
         /// <returns></returns>
         private static async Task<string> GetAccessTokenAsync(string authority, string resource, string scope)
         {
+            // If the token expires within the next five minutes, we'll grab a new one.
+            if (_cachedToken != null)
+            {
+                if (_cachedToken.ExpiresOn > DateTime.UtcNow.AddSeconds(30))
+                {
+                    // Use the existing token, it's still valid.
+                    return _cachedToken.AccessToken;
+                }
+            }
+
             var aimsEndpoint = "169.254.169.254";
             var apiVersion = "2018-02-01";
 
@@ -66,9 +76,31 @@ namespace Zimmergren.ACI.DemoWithManagedIdentity
 
             // Parse the Json response and pick the "access_token" property, which has the value of our Bearer authorization token.
             var rawResponse = JObject.Parse(response);
-            var accessToken = rawResponse["access_token"].Value<string>();
+            var accessTokenValue = rawResponse["access_token"].Value<string>();
+            var expiresOnValue = rawResponse["expires_on"].Value<int>();
 
-            return accessToken;
+            // There's frameworks and helpers for this, but for clarity in this example
+            // I think it makes sense to explain exactly how this is happening, which should
+            // be clear from the below code sample. (expires_on in a jwt token is in seconds since Unix epoch).
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var expiryDate = epoch.AddSeconds(expiresOnValue);
+            _cachedToken = new CachedAccessToken(accessTokenValue, expiryDate);
+
+            return accessTokenValue;
+        }
+
+        private static CachedAccessToken _cachedToken;
+    }
+
+    public class CachedAccessToken
+    {
+        public string AccessToken { get; }
+        public DateTime ExpiresOn { get; }
+
+        public CachedAccessToken(string accessToken, DateTime expiresOn)
+        {
+            AccessToken = accessToken;
+            ExpiresOn = expiresOn;
         }
     }
 }
