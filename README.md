@@ -1,4 +1,4 @@
-# Azure Container Instances (ACI) - C# .NET Core examples and tips
+# Azure Container Instances & .NET Core - Samples
 
 The source code and definition files in this repo serves as examples from various blog posts around Azure Container Registry, ACI.
 
