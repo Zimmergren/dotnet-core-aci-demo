@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.Services.AppAuthentication;
 using Newtonsoft.Json.Linq;
 
 namespace Zimmergren.ACI.DemoWithManagedIdentity
@@ -26,19 +27,41 @@ namespace Zimmergren.ACI.DemoWithManagedIdentity
         private static void ProcessRequest()
         {
             var secretName = "TobiSecretOne";
-            var secretValue = GetSecretFromKeyVault(secretName);
+
+            // Option 1 (Recommended):
+            var secretValue = GetSecretFromKeyVault_ManagedIdentity_TokenProvider(secretName);
+
+            // Option 2 (Manually obtaining token..)
+            //var secretValueOption2 = GetSecretFromKeyVault_ManuallyGettingToken(secretName);
 
             Console.WriteLine($" Secret '{secretName}' has value '{secretValue}'");
         }
 
         /// <summary>
-        /// Gets a given secret from the Key Vault
+        /// Gets a given secret from the Key Vault.
+        /// Demonstrates the underlying code to get the Access Token manually from iams.
         /// </summary>
         /// <param name="secretName">Name of the secret</param>
         /// <returns>String value of the secret</returns>
-        private static string GetSecretFromKeyVault(string secretName)
+        private static string GetSecretFromKeyVault_ManuallyGettingToken(string secretName)
         {
             var keyVault = new KeyVaultClient(GetAccessTokenAsync);
+            var secretResult = keyVault.GetSecretAsync($"https://myacidemovault.vault.azure.net", secretName).Result;
+
+            return secretResult.Value;
+        }
+
+        /// <summary>
+        /// Get a given secret from the Azure Key Vault.
+        /// Authenticates to the vault using Managed Identities and the AzureServiceTokenProvider provided by the Microsoft.Azure.Services.AppAuthentication nuget package.
+        /// This option enables us to avoid the manual token fetch.
+        /// </summary>
+        /// <param name="secretName"></param>
+        /// <returns></returns>
+        private static string GetSecretFromKeyVault_ManagedIdentity_TokenProvider(string secretName)
+        {
+            AzureServiceTokenProvider tokenProvider = new AzureServiceTokenProvider();
+            var keyVault = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(tokenProvider.KeyVaultTokenCallback));
             var secretResult = keyVault.GetSecretAsync($"https://myacidemovault.vault.azure.net", secretName).Result;
 
             return secretResult.Value;
